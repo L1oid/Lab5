@@ -1,7 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <iomanip>
 #include <string>
+#include <iostream>
+#include <cstdlib>
+#include <fstream>
 using namespace std;
 
 struct BookInfo
@@ -17,15 +17,16 @@ struct DLList
 {
     struct Node
     {
-        BookInfo data;     //information
-        Node* next;   //next node position
-        Node* prev;   //previous node position
+        BookInfo data;
+        Node* next;
+        Node* prev;
     };
 
-    Node* F = NULL;     //first node
-    Node* L = NULL;     //last node
-    Node* C = NULL;     //current node
-    int Count;        //node count
+    Node* F = NULL;
+    Node* L = NULL;
+    Node* C = NULL;
+    Node* Temp = NULL;
+    int Count;
 
     void Out();
     void Info();
@@ -47,6 +48,8 @@ struct DLList
     bool DelPrev(BookInfo&);
     bool DelFirst(BookInfo&);
     bool DelLast(BookInfo&);
+
+    void sort();
 };
 
 bool DLList::MoveNext()
@@ -152,7 +155,7 @@ bool DLList::AddLast(BookInfo data)
 
 void DLList::Out()
 {
-    if (!F) 
+    if (!F)
     {
         cout << "List is empty" << endl;
         return;
@@ -164,7 +167,7 @@ void DLList::Out()
     {
         temp->data.Out();
         temp = temp->next;
-    }     while (temp);
+    } while (temp);
     cout << endl;
 }
 
@@ -276,7 +279,9 @@ void BookInfo::Out()
 
 bool GetFile(DLList&, BookInfo&);
 bool WriteFile(DLList&, BookInfo&);
-void GetBook(BookInfo&);
+void GetBook(BookInfo&); 
+void SortPrice(DLList&);
+void SortName(DLList&);
 
 int main()
 {
@@ -291,6 +296,8 @@ int main()
             << "2) Del element" << endl
             << "3) Clear list" << endl
             << "4) Upload data" << endl
+            << "5) Sort price" << endl
+            << "6) Sort name" << endl
             << "0) Exit" << endl;
         cout << endl << "Select an action: ";
         cin >> key;
@@ -319,7 +326,10 @@ int main()
                 break;
             case 3:
                 cout << "Enter position: ";
-                cin >> num;
+                do
+                {
+                    cin >> num;
+                } while (num < 1 || num > DLList.Count + 1);
                 GetBook(Info);
                 if (num == 1)
                 {
@@ -369,7 +379,10 @@ int main()
                 break;
             case 3:
                 cout << "Enter position: ";
-                cin >> num;
+                do
+                {
+                    cin >> num;
+                } while (num < 1 || num > DLList.Count);
                 if (num == 1)
                 {
                     DLList.DelFirst(Info);
@@ -404,6 +417,14 @@ int main()
             break;
         case 4:
             WriteFile(DLList, Info);
+            break;
+        case 5:
+            SortPrice(DLList);
+            DLList.Out();
+            break;
+        case 6:
+            SortName(DLList);
+            DLList.Out();
             break;
         default:
             if (key != 0)
@@ -445,7 +466,7 @@ bool WriteFile(DLList& DLList, BookInfo& Info)
     do
     {
         F << DLList.C->data.book << " " << DLList.C->data.pages << " " << DLList.C->data.price << " " << DLList.C->data.rating << endl;
-    }while (DLList.MoveNext());
+    } while (DLList.MoveNext());
     DLList.MoveFirst();
     F.close();
     return true;
@@ -465,4 +486,48 @@ void GetBook(BookInfo& Info)
     cout << "Enter the rating: ";
     cin >> Info.rating;
     cout << endl;
+}
+
+void SortPrice(DLList& List) 
+{
+    List.C = List.F;
+    List.Temp = List.F;
+    for (int i = 0; i < List.Count; i++) 
+    {
+        for (int j = 0; j < List.Count; j++)
+        {
+            if (List.C == List.Temp) continue;
+            if (List.Temp->data.price > List.C->data.price)
+            {
+                swap(List.Temp->data, List.C->data);
+            }
+            if (List.Temp->next != NULL) List.Temp = List.Temp->next;
+
+        }
+        List.Temp = List.F;
+        List.C = List.C->next;
+    }
+    List.C = List.F;
+}
+
+void SortName(DLList& List)
+{
+    List.C = List.F;
+    List.Temp = List.F;
+    for (int i = 0; i < List.Count; i++)
+    {
+        for (int j = 0; j < List.Count; j++)
+        {
+            if (List.C == List.Temp) continue;
+            if (List.Temp->data.book > List.C->data.book)
+            {
+                swap(List.Temp->data, List.C->data);
+            }
+            if (List.Temp->next != NULL) List.Temp = List.Temp->next;
+
+        }
+        List.Temp = List.F;
+        List.C = List.C->next;
+    }
+    List.C = List.F;
 }
